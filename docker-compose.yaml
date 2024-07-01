@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  mongodb-main:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb:/data-main/db
+  mongodb-1:
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb:/data-1/db
+  mongodb-2:
+    image: mongo:latest
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongodb:/data-2/db
+
+
+volumes:
+  mongodb:

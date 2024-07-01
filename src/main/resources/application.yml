@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: MultiRegionPoc
+#  Uncomment next section if you set mongodb.multi.enabled to false
+#  data:
+#    mongodb:
+#      uri: "mongodb://localhost:27017/test_db"
+
+application:
+  security:
+    jwt-secret: jwtsecret
+    jwt-issuer: fredpaist
+
+mongodb:
+  multi:
+    enabled: true
+    regions:
+      - region: "REGION_1"
+        properties:
+          uri: "mongodb://localhost:27018/test_db"
+          database: "test_db"
+      - region: "REGION_2"
+        properties:
+          uri: "mongodb://localhost:27019/test_db"
+          database: "test_db"
