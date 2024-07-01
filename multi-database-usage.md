@@ -1,6 +1,6 @@
 ## Usagedata Multidatabase usage with MongoDB
 ### Overview
-This Client (configuration) demonstrates the usage of multiple databases separated by country.
+This demonstrates the usage of multiple databases separated by country.
 The idea draws inspiration from the multi-tenancy architecture, where each tenant (in this case, a country) has its own isolated database.
 Additionally, there's a mix where certain entities are shared and stored in a common database accessible to all countries.
 
@@ -104,10 +104,3 @@ To switch regions/countries just need to set
 RegionContext.setRegionId("LV");
 ```
 where the key is equal to the configured region key in the properties
-
-
-## Open Questions
-1. what is the best way to set regions:
-   2. set it with the incoming request/started process
-   3. by repository query (this needs some spring boot Aspect version to wrap those)
-2. What about the changelog, supporting current changelog system is not so easy, should we convert it to js script like we have for indexes? 

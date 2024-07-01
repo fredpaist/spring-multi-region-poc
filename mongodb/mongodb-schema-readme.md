@@ -1,4 +1,4 @@
-# MongoDB Create-indexes Script README
+# MongoDB Schema and Indexes script README
 
 ## Overview
 
