@@ -2,6 +2,10 @@
 
 This is just proof of concept of how to use multiple DB's for different countries and also have common DB for shared entites
 
+### Based on
+* Spring boot 3.3
+* Latest MongoDB
+
 ## How to use
 1. run DB's from setup in docker-compose file `docker-compose up -d`
 2. (Optional) Setup schemas from mongodb js files explained [here](mongodb/mongodb-schema-readme.md)
