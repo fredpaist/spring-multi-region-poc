@@ -14,6 +14,8 @@ application:
 mongodb:
   multi:
     enabled: true
+    common:
+      uri: "mongodb://localhost:27017/test_db"
     regions:
       - region: "REGION_1"
         properties:

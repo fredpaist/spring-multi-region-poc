@@ -12,7 +12,10 @@ public class SystemConfiguration {
 
     @Id
     private String id;
-    private String name;
-    private String version;
-    private String value;
+    private ConfigurationType name;
+    private Object value;
+
+    public boolean getAsBoolean() {
+        return (Boolean) value;
+    }
 }

@@ -1,6 +1,7 @@
 package ee.fredpaist.multiregion.service;
 
 import ee.fredpaist.multiregion.api.PersonRequest;
+import ee.fredpaist.multiregion.data_accesors.common.system.SystemConfiguration;
 import ee.fredpaist.multiregion.data_accesors.regional.person.Person;
 import ee.fredpaist.multiregion.data_accesors.regional.person.PersonRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -21,16 +23,18 @@ class PersonServiceTest {
 
     @Mock
     private PersonRepository personRepository;
+    @Mock
+    private SystemConfigurationProvider provider;
 
     private PersonService personService;
 
     @BeforeEach
     public void setUp() {
-        personService = new PersonService(personRepository);
+        personService = new PersonService(personRepository, provider);
     }
 
     @Test
-    void test_create_person_with_valid_data() {
+    void test_create_person_with_valid_data_and_required_fields() {
         ArgumentCaptor<Person> personArgumentCaptor = ArgumentCaptor.forClass(Person.class);
 
         PersonRequest request = new PersonRequest();
@@ -39,6 +43,7 @@ class PersonServiceTest {
         request.setEmail("john.doe@example.com");
         request.setPhoneNumber("+1234567890");
 
+        when(provider.getConfigurationByType(any())).thenReturn(new SystemConfiguration().setValue(true));
         when(personRepository.save(personArgumentCaptor.capture())).thenReturn(new Person());
 
         personService.createPerson(request);
@@ -59,6 +64,7 @@ class PersonServiceTest {
         request.setFirstName("Jane");
         request.setLastName("Doe");
 
+        when(provider.getConfigurationByType(any())).thenReturn(new SystemConfiguration().setValue(false));
         when(personRepository.save(personArgumentCaptor.capture())).thenReturn(new Person());
 
         personService.createPerson(request);
@@ -72,7 +78,7 @@ class PersonServiceTest {
     }
 
     @Test
-    void test_create_person_with_null_optional_fields() {
+    void test_create_person_with_null_when_optional_fields() {
         ArgumentCaptor<Person> personArgumentCaptor = ArgumentCaptor.forClass(Person.class);
 
         PersonRequest request = new PersonRequest();
@@ -81,6 +87,7 @@ class PersonServiceTest {
         request.setEmail(null);
         request.setPhoneNumber(null);
 
+        when(provider.getConfigurationByType(any())).thenReturn(new SystemConfiguration().setValue(false));
         when(personRepository.save(personArgumentCaptor.capture())).thenReturn(new Person());
 
         personService.createPerson(request);
@@ -94,9 +101,40 @@ class PersonServiceTest {
     }
 
     @Test
+    void test_create_person_should_throw_exception_when_email_null_but_required() {
+        PersonRequest request = new PersonRequest();
+        request.setFirstName("Alice");
+        request.setLastName("Smith");
+        request.setEmail(null);
+        request.setPhoneNumber(null);
+
+        when(provider.getConfigurationByType(any())).thenReturn(new SystemConfiguration().setValue(true));
+        var result = assertThrows(IllegalArgumentException.class, () -> personService.createPerson(request));
+        assertThat(result.getMessage()).isEqualTo("Email is required");
+    }
+
+    @Test
+    void test_create_person_should_throw_exception_when_phone_null_but_required() {
+        PersonRequest request = new PersonRequest();
+        request.setFirstName("Alice");
+        request.setLastName("Smith");
+        request.setEmail(null);
+        request.setPhoneNumber(null);
+
+        when(provider.getConfigurationByType(any()))
+                .thenReturn(new SystemConfiguration().setValue(false))
+                .thenReturn(new SystemConfiguration().setValue(true));
+
+        var result = assertThrows(IllegalArgumentException.class, () -> personService.createPerson(request));
+
+        assertThat(result.getMessage()).isEqualTo("Phone number is required");
+    }
+
+    @Test
     void test_returns_person_object_when_valid_id_provided() {
         String validId = "123";
         Person expectedPerson = new Person().setId(validId).setFirstName("John").setLastName("Doe").setEmail("john.doe@example.com").setPhoneNumber("1234567890");
+
         when(personRepository.findById(validId)).thenReturn(Optional.of(expectedPerson));
         Person actualPerson = personService.getPersonById(validId);
         assertNotNull(actualPerson);
@@ -117,6 +155,7 @@ class PersonServiceTest {
         Person existingPerson = new Person().setId(id).setFirstName("John").setLastName("Doe").setEmail("john.doe@example.com").setPhoneNumber("1234567890");
         PersonRequest updatedRequest = new PersonRequest().setFirstName("Jane").setLastName("Smith").setEmail("jane.smith@example.com").setPhoneNumber("0987654321");
 
+        when(provider.getConfigurationByType(any())).thenReturn(new SystemConfiguration().setValue(true));
         when(personRepository.findById(id)).thenReturn(Optional.of(existingPerson));
         when(personRepository.save(any(Person.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -134,6 +173,7 @@ class PersonServiceTest {
         String id = "123";
         PersonRequest updatedRequest = new PersonRequest().setFirstName("Jane").setLastName("Smith").setEmail("jane.smith@example.com").setPhoneNumber("0987654321");
 
+        when(provider.getConfigurationByType(any())).thenReturn(new SystemConfiguration().setValue(true));
         when(personRepository.findById(id)).thenReturn(Optional.empty());
 
         Exception exception = assertThrows(RuntimeException.class, () -> {

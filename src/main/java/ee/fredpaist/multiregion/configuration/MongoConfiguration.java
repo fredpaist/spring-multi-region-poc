@@ -1,5 +1,6 @@
 package ee.fredpaist.multiregion.configuration;
 
+import ee.fredpaist.multiregion.data_accesors.common.system.ConfigurationType;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,10 @@ public class MongoConfiguration {
     @Bean
     public MongoCustomConversions mongoCustomConversions() {
         List<Converter<?, ?>> converterList = new ArrayList<>();
+
+        converterList.add(new ConfigurationType.FromValueConverter());
+        converterList.add(new ConfigurationType.ToValueConverter());
+
         return new MongoCustomConversions(converterList);
     }
 }
